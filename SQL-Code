@@ -1,0 +1,259 @@
+DROP TABLE delivery;
+DROP TABLE menu_item;
+DROP TABLE payment_information;
+DROP TABLE order_line;
+DROP TABLE restaurant;
+DROP TABLE review;
+DROP TABLE customer;
+
+CREATE TABLE customer (
+  phone_number NUMBER(11) NOT NULL,
+  full_name VARCHAR2(50) NOT NULL,
+  gender VARCHAR2(10) NOT NULL,
+  street VARCHAR2(100),
+  city VARCHAR2(20),
+  region_abbr CHAR(2),
+  postal_code VARCHAR2(10),
+  email VARCHAR2(100),
+CONSTRAINT customer_pk PRIMARY KEY (phone_number)
+);
+
+CREATE TABLE restaurant (
+  restaurant_id NUMBER(11) NOT NULL,
+  restaurant_name VARCHAR2(100),
+  restaurant_type VARCHAR2(100),
+  street VARCHAR2(100),
+  city VARCHAR2(20),
+  region_abbr CHAR(2),
+  postal_code VARCHAR2(10),
+CONSTRAINT restaurant_pk PRIMARY KEY (restaurant_id)
+);
+
+CREATE TABLE menu_item (
+  item_id VARCHAR2(20) NOT NULL,
+  item_name VARCHAR2(100),
+  price NUMBER(7,2),
+  restaurant_id NUMBER(11) NOT NULL,
+CONSTRAINT menu_item_pk PRIMARY KEY (item_id),
+CONSTRAINT menu_item_fk FOREIGN KEY (restaurant_id) REFERENCES restaurant(restaurant_id)
+);
+
+CREATE TABLE order_line (
+  order_id NUMBER(11) NOT NULL,
+  phone_number NUMBER(11) NOT NULL,
+  item_id VARCHAR2(20) NOT NULL,
+  quantity NUMBER(11),
+  order_date DATE,
+CONSTRAINT order_line_pk PRIMARY KEY (order_id),
+CONSTRAINT order_line_fk1 FOREIGN KEY (phone_number) REFERENCES customer (phone_number),
+CONSTRAINT order_line_fk2 FOREIGN KEY (item_id) REFERENCES menu_item (item_id)
+);
+
+CREATE TABLE delivery (
+  options VARCHAR2(20) NOT NULL,
+  time_cost_hourly NUMBER(5,2) NOT NULL,  
+  order_id NUMBER(11) NOT NULL,
+  phone_number NUMBER(11) NOT NULL,
+  restaurant_id NUMBER(11) NOT NULL,
+CONSTRAINT delivery_pk PRIMARY KEY (order_id, phone_number, restaurant_id),
+CONSTRAINT delivery_fk1 FOREIGN KEY (phone_number) REFERENCES customer (phone_number),
+CONSTRAINT delivery_fk2 FOREIGN KEY (restaurant_id) REFERENCES restaurant (restaurant_id),
+CONSTRAINT delivery_fk3 FOREIGN KEY (order_id) REFERENCES order_line (order_id)
+);
+
+CREATE TABLE payment_information (
+  payment_id NUMBER(11) NOT NULL,
+  order_id NUMBER(11) NOT NULL,
+  phone_number NUMBER(11) NOT NULL,
+CONSTRAINT payment_pk PRIMARY KEY (payment_id),
+CONSTRAINT payment_fk1 FOREIGN KEY (phone_number) REFERENCES customer(phone_number),
+CONSTRAINT payment_fk2 FOREIGN KEY (order_id) REFERENCES order_line(order_id)
+);
+
+CREATE TABLE review(
+  rating NUMBER(5,2) NOT NULL,
+  comments VARCHAR2(1000),  
+  phone_number NUMBER(11) NOT NULL,
+CONSTRAINT review_fk FOREIGN KEY (phone_number) REFERENCES customer (phone_number)
+);
+
+ALTER SESSION SET nls_date_language='american';
+
+SELECT * FROM customer;
+
+insert into customer values (6156021640, 'John Doe', 'male', '200 Maple', 'SLC', 'UT', '84102', 'johndoe@umail.utah.edu');
+insert into customer values (6156021642, 'Bill Doll', 'male', '300 West', 'SLC', 'UT', '84107', 'billdoll@umail.utah.edu');
+insert into customer values (6156021643, 'Josh Turburn', 'male', '250 North', 'SLC', 'UT', '84108', 'joshturburn@umail.utah.edu');
+insert into customer values (6156021644, 'Mary Lee', 'female', '200 South', 'SLC', 'UT', '84102', 'marylee@umail.utah.edu');
+insert into customer values (4355576661, 'Jane Smith', 'female', '120 University', 'SLC', 'UT', '84102', 'janesmith@umail.utah.edu');
+insert into customer values (4355576662, 'Luis Smith', 'male', '200 Maple', 'SLC', 'UT', '84102', 'luissmith@umail.utah.edu');
+insert into customer values (4355576663, 'Ben Brown', 'male', '300 West', 'SLC', 'UT', '84107', 'benbrown@umail.utah.edu');
+insert into customer values (4355576664, 'Carl Smith', 'female', '250 North', 'SLC', 'UT', '84108', 'carlsmith@umail.utah.edu');
+insert into customer values (2539047871, 'John Doll', 'male', '200 South', 'SLC', 'UT', '84102', 'johndoll@umail.utah.edu');
+insert into customer values (2539047872, 'Jennet Chris', 'female', '120 University', 'SLC', 'UT', '84102', 'jennetchris@umail.utah.edu');
+insert into customer values (2539047874, 'Joyce French', 'male', '200 Main', 'Tucson', 'AZ', '45102', 'joycefrench@umail.utah.edu');
+insert into customer values (2539047875, 'Jennifer English', 'female', '250 State', 'Tucson', 'AZ', '45112', 'jenniferenglish@umail.utah.edu');
+insert into customer values (8018337801, 'Tom Borg', 'male', '3000 Sunset', 'LA', 'CA', '12112', 'tombrog@umail.utah.edu');
+insert into customer values (8018337802, 'Helen Thomas', 'female', '1200 Hollywood', 'LA', 'CA', '12117', 'hellenthomas@umail.utah.edu');
+insert into customer values (8018337803, 'Brian Borg', 'male', '100 College', 'SF', 'CA', '17118', 'brianbrog@umail.utah.edu');
+
+SELECT * FROM restaurant;
+
+insert into restaurant values (101, 'Log Haven', 'American restaurant', '6451 Mill Creek Canyon Rd', 'SLC', 'UT', '84109');
+insert into restaurant values (102, 'Saffron Valley', 'Indian restaurant', '1098 UT-151 Unit 102', 'South Jordan', 'UT', '84095');
+insert into restaurant values (103,'La Caille', 'French restaurant', '9565 Wasatch Blvd', 'Sandy', 'UT', '84092');
+insert into restaurant values (104, 'My Thai Asian Cuisine', 'Thai restaurant', '300 West', 'SLC', 'UT', '84115');
+insert into restaurant values (105, 'Thai Archer Restaurant Utah', 'Thai restaurant', '1100 East', 'SLC', 'UT', '84105');
+insert into restaurant values (106, 'Red Maple Chinese Restaurant', 'Chinese restaurant', '4700 South', 'SLC', 'UT', '84129');
+insert into restaurant values (107, 'Hamachi', 'Sushi restaurant', '100 South', 'SLC', 'UT', '84111');
+insert into restaurant values (108, 'Korea House BBQ', 'Korean restaurant', '145 South', 'SLC', 'UT', '84115');
+
+SELECT * FROM menu_item;
+
+insert into menu_item values ('LH1018410901', 'GRILLED BONE-IN DUROC PORK CHOP', 17, 101);
+insert into menu_item values ('LH1018410902', 'KOREAN FRIED CAULIFLOWER', 15, 101);
+insert into menu_item values ('SV1028405901', 'ASSORTED PAKORAS', 7.95, 102);
+insert into menu_item values ('SV1028405902', 'CHICKEN TIKKA KEBAB', 13.95, 102);
+insert into menu_item values ('LC1038409201', 'SEAFOOD COCKTAIL', 24, 103);
+insert into menu_item values ('LC1038409202', 'SPICED DUCK BREAST', 48, 103);
+insert into menu_item values ('TAC1048411501', 'SPRING ROLLS', 5.95, 104);
+insert into menu_item values ('TAC1048411502', 'PAD THAI', 12.95, 104);
+insert into menu_item values ('TA1058410501', 'THAI BBQ PORK', 10.95, 105);
+insert into menu_item values ('TA1058410502', 'PAHD KEE MAO', 11.95, 105);
+insert into menu_item values ('RMC1068412901', 'CASHEW NUT STIR FRIED', 13.95, 106);
+insert into menu_item values ('RMC1068412902', 'KUNG PAO', 13.95, 106);
+insert into menu_item values ('H1078411101', 'CHICKEN KARRAGE', 6.95, 107);
+insert into menu_item values ('H1078411102', 'SPICY TAKO', 6.50, 107);
+insert into menu_item values ('KH1088411501', 'BBQ SHORT RIBs', 26.99, 108);
+insert into menu_item values ('KH1088411502', 'BIBIMBAP with BEEF', 14.99, 108);
+
+SELECT * FROM order_line;
+
+insert into order_line values (01, 6156021640, 'LH1018410901', 1, '1-OCT-2020');
+insert into order_line values (02, 6156021640, 'SV1028405901', 2, '2-OCT-2020');
+insert into order_line values (03, 6156021640, 'TAC1048411501', 1, '3-OCT-2020');
+insert into order_line values (04, 6156021642, 'LC1038409202', 1, '1-OCT-2020');
+insert into order_line values (05, 6156021643, 'LC1038409201', 1, '5-OCT-2020');
+insert into order_line values (06, 6156021644, 'RMC1068412901', 2, '2-OCT-2020');
+insert into order_line values (07, 6156021644, 'KH1088411502', 2, '5-OCT-2020');
+insert into order_line values (08, 4355576661, 'TAC1048411501', 3, '6-OCT-2020');
+insert into order_line values (09, 4355576663, 'TAC1048411501', 1, '7-OCT-2020');
+insert into order_line values (10, 4355576663, 'TA1058410502', 1, '8-OCT-2020');
+insert into order_line values (11, 4355576663, 'H1078411101', 2, '1-OCT-2020');
+insert into order_line values (12, 2539047874, 'SV1028405901', 2, '10-OCT-2020');
+insert into order_line values (13, 2539047875, 'LC1038409202', 1, '9-OCT-2020');
+insert into order_line values (14, 2539047875, 'KH1088411501', 1, '10-OCT-2020');
+insert into order_line values (15, 8018337801, 'TAC1048411501', 3, '5-OCT-2020');
+insert into order_line values (16, 8018337801, 'H1078411102', 2, '6-OCT-2020');
+
+SELECT * FROM delivery;
+
+insert into delivery values ('pick-up', 1, 01, 6156021640, 101);
+insert into delivery values ('pick-up', 0.8, 02, 6156021640, 102);
+insert into delivery values ('delivery', 1, 03, 6156021640, 104);
+insert into delivery values ('delivery', 0.5, 04, 6156021642, 103);
+insert into delivery values ('delivery', 0.25, 05, 6156021643, 103);
+insert into delivery values ('delivery', 0.5, 06, 6156021644, 106);
+insert into delivery values ('delivery', 1, 07, 6156021644, 108);
+insert into delivery values ('delivery', 0.75, 08, 4355576661, 104);
+insert into delivery values ('delivery', 0.75, 09, 4355576663, 104);
+insert into delivery values ('delivery', 0.25, 10, 4355576663, 105);
+insert into delivery values ('pick-up', 1.5, 11, 4355576663, 107);
+insert into delivery values ('pick-up', 2, 12, 2539047874, 102);
+insert into delivery values ('delivery', 0.5, 13, 2539047875, 103);
+insert into delivery values ('delivery', 0.75, 14, 2539047875, 108);
+insert into delivery values ('pick-up', 0.5, 15, 8018337801, 104);
+insert into delivery values ('delivery', 0.5, 16, 8018337801, 107);
+
+SELECT * FROM payment_information;
+
+insert into payment_information values (2020100110, 01, 6156021640);
+insert into payment_information values (2020100113, 04, 6156021642);
+insert into payment_information values (2020100512, 05, 6156021643);
+insert into payment_information values (2020100615, 08, 4355576661);
+insert into payment_information values (2020100718, 09, 4355576663);
+insert into payment_information values (2020100910, 13, 2539047875);
+insert into payment_information values (2020100816, 10, 4355576663);
+insert into payment_information values (2020101019, 12, 2539047874);
+insert into payment_information values (2020100610, 16, 8018337801);
+
+SELECT * FROM review;
+
+insert into review values (4, 'Great', 6156021640);
+insert into review values (5, 'Perfect', 6156021640);
+insert into review values (3, 'Normal taste', 6156021640);
+insert into review values (1.5, 'Bad experience', 6156021642);
+insert into review values (3, 'Probably not order again', 6156021643);
+insert into review values (4.5, 'I will try it again', 6156021644);
+insert into review values (3.5, 'Great', 6156021644);
+insert into review values (5, 'Recommend', 4355576661);
+insert into review values (2, 'Bad', 4355576663);
+insert into review values (3, 'Good', 4355576663);
+insert into review values (1, 'Do not come again', 4355576663);
+insert into review values (2.5, 'Bad service', 2539047874);
+insert into review values (3, 'Not bad', 2539047875);
+insert into review values (4.5, 'Perfect', 2539047875);
+insert into review values (2.5, 'There are no free parking sites', 8018337801);
+insert into review values (0.5, 'Extremely bad', 8018337801);
+
+-- Listing Customer Table
+
+SELECT * FROM customer;
+
+-- Listing Restaurant Table
+
+SELECT * FROM restaurant;
+
+-- Listing Menu Items Table
+
+SELECT * FROM menu_item;
+
+-- Listing Order Table
+
+SELECT * FROM order_line;
+
+-- Listing Delivery Table
+
+SELECT * FROM delivery;
+
+-- Listing Payment Information Table
+
+SELECT * FROM payment_information;
+
+-- Listing Review Table
+
+SELECT * FROM review;
+
+-- Querying Table - Update Data
+-- 90% discounted for item price in Log Haven restaurant (Restaruant ID: 101)
+UPDATE menu_item
+SET price = price * 0.9 
+WHERE restaurant_id = 101
+;
+
+-- Querying Table - Combine Data
+-- Displaying the money cost for each phone number.  
+
+SELECT phone_number, SUM(price * quantity) money_cost
+from order_line INNER JOIN menu_item on order_line.item_id = menu_item.item_id
+GROUP BY phone_number
+ORDER BY money_cost DESC
+;
+
+-- Querying Table - Combine Data
+-- Displaying average rating for each item
+-- NOTE: 5 points are the highest scores.
+
+SELECT item_id, AVG(rating) avg_rating
+from order_line INNER JOIN review on order_line.phone_number = review.phone_number
+GROUP BY item_id
+ORDER BY AVG(rating)
+;
+
+-- Querying Table - SELECT Date
+-- Displaying which delivery options (delivery or pick-up) will take average longer time
+
+SELECT options, AVG(time_cost_hourly) total_amount_time
+from delivery
+GROUP BY options
+;
